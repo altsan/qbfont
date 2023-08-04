@@ -145,11 +145,70 @@ void FontEditor::flipGlyphY()
 }
 
 
+void FontEditor::insertColumn()
+{
+    // TODO prompt the user to select both position and direction
+}
+
+
+void FontEditor::addColumn()
+{
+    // TODO prompt the user to select both position and direction
+}
+
+
+void FontEditor::shiftLeft()
+{
+    editor->insertColumnLeft( editor->increment()-1, false );
+}
+
+
+void FontEditor::shiftRight()
+{
+    editor->insertColumnRight( 0, false );
+}
+
+
+void FontEditor::shiftUp()
+{
+}
+
+
+void FontEditor::shiftDown()
+{
+}
+
+
+void FontEditor::widenLeft()
+{
+    /* It looks counter-intuitive, but to add a new column on the left, we
+     * effectively have to widen the image on the _right_, and then insert a
+     * column at position 0, shifting everything one pixel to the right.
+     */
+    editor->insertColumnRight( 0, true );
+}
+
+
+void FontEditor::widenRight()
+{
+    /* To add a new column on the right, we widen the image on the right,
+     * and then 'insert' an empty column in the new position (to replace
+     * the filled-by-default new column with blank pixels instead).
+     */
+    editor->insertColumnRight( editor->increment(), true );
+}
+
+
+void FontEditor::widenBoth()
+{
+}
+
+
 void FontEditor::about()
 {
     QMessageBox::about( this,
                         tr("Product Information"),
-                        tr("<b>OS/2 Bitmap Font Editor</b><br>Version %1<hr>"
+                        tr("<b>QBFont - Bitmap Font Editor</b><br>Version %1<hr>"
                            "Copyright &copy;2023 Alexander Taylor"
                            "<p>Licensed under the GNU General Public License "
                            "version 3.0&nbsp;<br>"
@@ -264,6 +323,8 @@ void FontEditor::createActions()
     revertAction = new QAction( tr("Re&vert"), this );
 
     selectAction = new QAction( tr("&Select..."), this );
+    selectAction->setStatusTip( tr("Activate selection mode") );
+    selectAction->setCheckable( true );
     connect( selectAction, SIGNAL( triggered() ), this, SLOT( setSelect() ));
 
     selectAllAction = new QAction( tr("Select &all"), this );
@@ -305,16 +366,29 @@ void FontEditor::createActions()
 
     // Width actions
     widenLeftAction = new QAction( tr("Wider &left"), this );
+    connect( widenLeftAction, SIGNAL( triggered() ), this, SLOT( widenLeft() ));
+
     widenRightAction = new QAction( tr("Wider &right"), this );
+    connect( widenRightAction, SIGNAL( triggered() ), this, SLOT( widenRight() ));
+
     widenBothAction = new QAction( tr("&Wider &both"), this );
+    connect( widenBothAction, SIGNAL( triggered() ), this, SLOT( widenBoth() ));
+
     narrowLeftAction = new QAction( tr("&Narrower left"), this );
     narrowRightAction = new QAction( tr("Narr&ower right"), this );
     narrowBothAction = new QAction( tr("&Narro&wer both"), this );
 
     shiftUpAction = new QAction( tr("&Up"), this );
+    connect( shiftUpAction, SIGNAL( triggered() ), this, SLOT( shiftUp() ));
+
     shiftDownAction = new QAction( tr("&Down"), this );
+    connect( shiftDownAction, SIGNAL( triggered() ), this, SLOT( shiftDown() ));
+
     shiftLeftAction = new QAction( tr("&Left"), this );
+    connect( shiftLeftAction, SIGNAL( triggered() ), this, SLOT( shiftLeft() ));
+
     shiftRightAction = new QAction( tr("&Right"), this );
+    connect( shiftRightAction, SIGNAL( triggered() ), this, SLOT( shiftRight() ));
 
     flipXAction = new QAction( tr("Flip &horizontally"), this );
     flipXAction->setStatusTip( tr("Flip (i.e. mirror) the glyph horizontally") );
@@ -507,18 +581,21 @@ void FontEditor::updateModified( bool isModified )
 void FontEditor::setSelect()
 {
     editor->setSelectMode( true );
+    selectAction->setChecked( true );
 }
 
 
 void FontEditor::setSelectAll()
 {
     editor->selectAll();
+    selectAction->setChecked( true );
 }
 
 
 void FontEditor::setDeselect()
 {
     editor->setSelectMode( false );
+    selectAction->setChecked( false );
 }
 
 

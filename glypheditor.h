@@ -63,15 +63,19 @@ public:
     void    clear();
     void    mirror( Qt::Orientation direction );
 
+    void    insertColumnLeft( int pos, bool widen=false );
+    void    insertColumnRight( int pos, bool widen=false );
 /*
-    void    insertColumn( int x, bool widen=false );
-    void    deleteColumn( int x, bool narrow=false );
-    void    insertRow( int y );
-    void    deleteRow( int y );
-    void    narrow( bool left, bool right );
-    void    widen( bool left, bool right );
-    void    shift( Qt::Orientation direction, int count=1 );
+    void    deleteColumnLeft( int pos, bool narrow=false );
+    void    deleteColumnRight( int pos, bool narrow=false );
+
+    void    widenBoth();
+    void    narrowBoth();
+
+    void    insertRowUp( int pos );
+    void    deleteRowDown( int pos );
 */
+
 
 
 
@@ -85,8 +89,10 @@ protected:
     void resizeEvent( QResizeEvent *event );
 
 private:
-    void setImagePixel( const QPoint &pos, bool opaque );
+    void  setImagePixel( const QPoint &pos, bool opaque );
     void  setModified( bool modified );
+    void  startSelection( const QPoint &pos );
+    void  expandSelection( const QPoint &pos );
     QRect pixelRect( int i, int j ) const;
     bool  showGrid() const;
 

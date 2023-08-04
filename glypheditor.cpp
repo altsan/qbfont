@@ -93,10 +93,18 @@ void GlyphEditor::paintEvent( QPaintEvent *event )
 
 void GlyphEditor::mousePressEvent( QMouseEvent *event )
 {
-    if ( event->button() == Qt::LeftButton )
-        setImagePixel( event->pos(), true );
-    else if ( event->button() == Qt::RightButton )
-        setImagePixel( event->pos(), false );
+    if ( event->button() == Qt::LeftButton ) {
+        if ( bSelectionOn )
+            startSelection( event->pos() );
+        else
+            setImagePixel( event->pos(), true );
+    }
+    else if ( event->button() == Qt::RightButton ) {
+        if ( bSelectionOn )
+            expandSelection( event->pos() );
+        else
+            setImagePixel( event->pos(), false );
+    }
 }
 
 
@@ -106,8 +114,13 @@ void GlyphEditor::mouseMoveEvent( QMouseEvent *event )
     int cellX,
         cellY;
 
-    if ( event->buttons() & Qt::LeftButton )
-        setImagePixel( event->pos(), true );
+    if ( event->buttons() & Qt::LeftButton ) {
+        if ( bSelectionOn ) {
+            expandSelection( event->pos() );
+        }
+        else
+            setImagePixel( event->pos(), true );
+    }
     else if ( event->buttons() & Qt::RightButton )
         setImagePixel( event->pos(), false );
 
@@ -171,6 +184,59 @@ void GlyphEditor::mirror( Qt::Orientation direction )
 }
 
 
+/* Insert an empty column at the given position, shifting everything
+ * to the left of that position over by one.
+ */
+void GlyphEditor::insertColumnLeft( int pos, bool widen )
+{
+    if ( widen ) {
+        QImage newImage = image.copy( 0, 0, image.width()+1, image.height() );
+        image = newImage;
+        updateGeometry();
+    }
+
+    for ( int y = 0; y < image.height(); y++ ) {
+        QRgb *row = (QRgb *) image.scanLine( y );
+        for ( int x = 0; x < image.width(); x++ ) {
+            if ( x < pos )
+                row[ x ] = row[ x+1 ];
+            else if ( x == pos )
+                row[ x ] = rgbOff;
+            // else leave pixel unchanged
+        }
+    }
+
+    update();
+}
+
+
+/* Insert an empty column at the given position, shifting everything
+ * to the right of that position over by one.
+ */
+void GlyphEditor::insertColumnRight( int pos, bool widen )
+{
+    if ( widen ) {
+        QImage newImage = image.copy( 0, 0, image.width()+1, image.height() );
+        image = newImage;
+        updateGeometry();
+
+    }
+
+    for ( int y = 0; y < image.height(); y++ ) {
+        QRgb *row = (QRgb *) image.scanLine( y );
+        for ( int x = image.width() - 1; x >= 0; x-- ) {
+            if ( x > pos )
+                row[ x ] = row[ x-1 ];
+            if ( x == pos )
+                row[ x ] = rgbOff;
+            // else leave pixel unchanged
+        }
+    }
+
+    update();
+}
+
+
 void GlyphEditor::selectAll()
 {
     bSelectionOn = true;
@@ -226,6 +292,10 @@ void GlyphEditor::setSelectMode( bool on )
 {
     bSelectionOn = on;
     curSelection = QRect( 0, 0, 0, 0 );
+    if ( on )
+        setCursor( Qt::CrossCursor );
+    else
+        unsetCursor();
     update();
 }
 
@@ -258,6 +328,23 @@ void GlyphEditor::setImagePixel( const QPoint &pos, bool opaque )
 }
 
 
+void GlyphEditor::startSelection( const QPoint &pos )
+{
+    int i = pos.x() / iZoom;
+    int j = pos.y() / iZoom;
+
+    curSelection = QRect( i, j, 1, 1 );
+    update();
+}
+
+
+void GlyphEditor::expandSelection( const QPoint &pos )
+{
+    curSelection.setBottomRight( pos / iZoom );
+    update();
+}
+
+
 bool GlyphEditor::showGrid() const
 {
     return ( iZoom >= 3 );
@@ -273,5 +360,6 @@ QRect GlyphEditor::pixelRect( int i, int j ) const
         return QRect( iZoom * i, iZoom * j, iZoom, iZoom );
     }
 }
+
 
 

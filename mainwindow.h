@@ -77,7 +77,15 @@ private slots:
     void clearGlyph();
     void flipGlyphX();
     void flipGlyphY();
-
+    void shiftLeft();
+    void shiftRight();
+    void shiftUp();
+    void shiftDown();
+    void insertColumn();
+    void addColumn();
+    void widenLeft();
+    void widenRight();
+    void widenBoth();
 
 private:
     // Setup methods
