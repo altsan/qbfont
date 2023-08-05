@@ -159,48 +159,50 @@ void FontEditor::addColumn()
 
 void FontEditor::shiftLeft()
 {
-    editor->insertColumnLeft( editor->increment()-1, false );
+    editor->insertColumnShiftLeft( editor->increment()-1 );
 }
 
 
 void FontEditor::shiftRight()
 {
-    editor->insertColumnRight( 0, false );
+    editor->insertColumnShiftRight( 0 );
 }
 
 
 void FontEditor::shiftUp()
 {
+    editor->insertRowUp( editor->glyphImage().height()-1 );
 }
 
 
 void FontEditor::shiftDown()
 {
+    editor->insertRowDown( 0 );
 }
 
 
 void FontEditor::widenLeft()
 {
-    /* It looks counter-intuitive, but to add a new column on the left, we
-     * effectively have to widen the image on the _right_, and then insert a
-     * column at position 0, shifting everything one pixel to the right.
+    /* To add a new column on the left, this call widens the image on the
+     * right, then inserts a new column at position 0 (shifting everything
+     * one pixel over).
      */
-    editor->insertColumnRight( 0, true );
+    editor->insertColumnShiftRight( 0, true );
 }
 
 
 void FontEditor::widenRight()
 {
-    /* To add a new column on the right, we widen the image on the right,
-     * and then 'insert' an empty column in the new position (to replace
-     * the filled-by-default new column with blank pixels instead).
+    /* To add a new column on the right, this call widens the image on the
+     * right and fills the new column with blank pixels.
      */
-    editor->insertColumnRight( editor->increment(), true );
+    editor->insertColumnShiftRight( editor->increment(), true );
 }
 
 
 void FontEditor::widenBoth()
 {
+    editor->widenLeftAndRight();
 }
 
 
@@ -346,23 +348,23 @@ void FontEditor::createActions()
 
     // Column actions
     insertColumnAction = new QAction( tr("&Insert..."), this );
-    insertColumnAction->setStatusTip( tr("Insert an empty column without changing the increment.") );
+    insertColumnAction->setStatusTip( tr("Insert an empty column without changing the increment") );
 
     addColumnAction = new QAction( tr("Insert and &widen..."), this );
-    addColumnAction->setStatusTip( tr("Insert an empty column, increasing the increment by one.") );
+    addColumnAction->setStatusTip( tr("Insert an empty column, increasing the increment by one") );
 
     deleteColumnAction = new QAction( tr("&Delete..."), this );
-    deleteColumnAction->setStatusTip( tr("Delete a column without changing the increment.") );
+    deleteColumnAction->setStatusTip( tr("Delete a column without changing the increment") );
 
     removeColumnAction = new QAction( tr("Delete and &narrow..."), this );
-    removeColumnAction->setStatusTip( tr("Delete a column and reduce the increment by one.") );
+    removeColumnAction->setStatusTip( tr("Delete a column and reduce the increment by one") );
 
     // Row actions
     insertRowAction = new QAction( tr("&Insert..."), this );
-    insertRowAction->setStatusTip( tr("Insert an empty row.") );
+    insertRowAction->setStatusTip( tr("Insert an empty row") );
 
     deleteRowAction = new QAction( tr("&Delete..."), this );
-    deleteRowAction->setStatusTip( tr("Delete a row.") );
+    deleteRowAction->setStatusTip( tr("Delete a row") );
 
     // Width actions
     widenLeftAction = new QAction( tr("Wider &left"), this );
@@ -379,15 +381,23 @@ void FontEditor::createActions()
     narrowBothAction = new QAction( tr("&Narro&wer both"), this );
 
     shiftUpAction = new QAction( tr("&Up"), this );
+    shiftUpAction->setShortcut( QKeySequence( Qt::Key_Up | Qt::SHIFT ));
+    shiftUpAction->setStatusTip( tr("Shift all pixels up by one") );
     connect( shiftUpAction, SIGNAL( triggered() ), this, SLOT( shiftUp() ));
 
     shiftDownAction = new QAction( tr("&Down"), this );
+    shiftDownAction->setShortcut( QKeySequence( Qt::Key_Down | Qt::SHIFT ));
+    shiftDownAction->setStatusTip( tr("Shift all pixels down by one") );
     connect( shiftDownAction, SIGNAL( triggered() ), this, SLOT( shiftDown() ));
 
     shiftLeftAction = new QAction( tr("&Left"), this );
+    shiftLeftAction->setShortcut( QKeySequence( Qt::Key_Left | Qt::SHIFT ));
+    shiftLeftAction->setStatusTip( tr("Shift all pixels left by one") );
     connect( shiftLeftAction, SIGNAL( triggered() ), this, SLOT( shiftLeft() ));
 
     shiftRightAction = new QAction( tr("&Right"), this );
+    shiftRightAction->setShortcut( QKeySequence( Qt::Key_Right | Qt::SHIFT ));
+    shiftRightAction->setStatusTip( tr("Shift all pixels right by one") );
     connect( shiftRightAction, SIGNAL( triggered() ), this, SLOT( shiftRight() ));
 
     flipXAction = new QAction( tr("Flip &horizontally"), this );

@@ -36,12 +36,16 @@ class GlyphEditor : public QWidget
     Q_PROPERTY( int baseLine READ baseLine WRITE setBaseLine )
     Q_PROPERTY( int increment READ increment WRITE setIncrement )
     Q_PROPERTY( bool selectMode READ selectMode WRITE setSelectMode )
+    Q_PROPERTY( bool changed READ isChanged )
 
 public:
     GlyphEditor( QWidget *parent = 0 );
 
+    // Overridden methods
     QSize   sizeHint() const;
 
+
+    // Properties
     void    setZoomFactor( int newZoom );
     int     zoomFactor() const { return iZoom; }
 
@@ -51,31 +55,33 @@ public:
     void    setBaseLine( int offset );
     int     baseLine() const { return iBaseLine; }
 
-    bool    isChanged() const { return bChanged; }
+    void    setIncrement( int increment );
+    int     increment() const { return image.width(); }
 
     void    setSelectMode( bool on );
     bool    selectMode() const { return bSelectionOn; }
 
-    void    setIncrement( int increment );
-    int     increment() const { return image.width(); }
+    bool    isChanged() const { return bChanged; }
 
-    void    selectAll();
+
+    // Other public methods
     void    clear();
-    void    mirror( Qt::Orientation direction );
+    void    selectAll();
 
-    void    insertColumnLeft( int pos, bool widen=false );
-    void    insertColumnRight( int pos, bool widen=false );
+    void    insertColumnShiftLeft( int pos, bool widen=false );
+    void    insertColumnShiftRight( int pos, bool widen=false );
+    void    mirror( Qt::Orientation direction );
+    void    widenLeftAndRight();
+
+    void    insertRowDown( int pos );
+    void    insertRowUp( int pos );
+
 /*
     void    deleteColumnLeft( int pos, bool narrow=false );
     void    deleteColumnRight( int pos, bool narrow=false );
 
-    void    widenBoth();
     void    narrowBoth();
-
-    void    insertRowUp( int pos );
-    void    deleteRowDown( int pos );
 */
-
 
 
 

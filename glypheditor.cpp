@@ -187,7 +187,7 @@ void GlyphEditor::mirror( Qt::Orientation direction )
 /* Insert an empty column at the given position, shifting everything
  * to the left of that position over by one.
  */
-void GlyphEditor::insertColumnLeft( int pos, bool widen )
+void GlyphEditor::insertColumnShiftLeft( int pos, bool widen )
 {
     if ( widen ) {
         QImage newImage = image.copy( 0, 0, image.width()+1, image.height() );
@@ -205,7 +205,6 @@ void GlyphEditor::insertColumnLeft( int pos, bool widen )
             // else leave pixel unchanged
         }
     }
-
     update();
 }
 
@@ -213,26 +212,83 @@ void GlyphEditor::insertColumnLeft( int pos, bool widen )
 /* Insert an empty column at the given position, shifting everything
  * to the right of that position over by one.
  */
-void GlyphEditor::insertColumnRight( int pos, bool widen )
+void GlyphEditor::insertColumnShiftRight( int pos, bool widen )
 {
     if ( widen ) {
         QImage newImage = image.copy( 0, 0, image.width()+1, image.height() );
         image = newImage;
         updateGeometry();
-
     }
 
     for ( int y = 0; y < image.height(); y++ ) {
         QRgb *row = (QRgb *) image.scanLine( y );
-        for ( int x = image.width() - 1; x >= 0; x-- ) {
+        for ( int x = image.width()-1; x >= 0; x-- ) {
             if ( x > pos )
                 row[ x ] = row[ x-1 ];
-            if ( x == pos )
+            else if ( x == pos )
                 row[ x ] = rgbOff;
             // else leave pixel unchanged
         }
     }
+    update();
+}
 
+
+void GlyphEditor::widenLeftAndRight()
+{
+    // Add two columns
+    QImage newImage = image.copy( 0, 0, image.width()+2, image.height() );
+    image = newImage;
+    updateGeometry();
+
+    // Shift everything right by 1 and clear the left- and right-most columns
+    for ( int y = 0; y < image.height(); y++ ) {
+        QRgb *row = (QRgb *) image.scanLine( y );
+        for ( int x = image.width()-2; x > 0; x-- )
+            row[ x ] = row[ x-1 ];
+        row[ 0 ] = rgbOff;
+        row[ image.width()-1 ] = rgbOff;
+    }
+    update();
+}
+
+
+/* Insert an empty row at the given position, shifting everything
+ * below that position down by one.
+ */
+void GlyphEditor::insertRowDown( int pos )
+{
+    for ( int y = image.height()-1; y >= 0; y-- ) {
+        QRgb *row = (QRgb *) image.scanLine( y );
+        QRgb *prevRow = NULL;
+        if (( y > pos ) && ( y > 0 ))
+            prevRow = (QRgb *) image.scanLine( y-1 );
+        for ( int x = 0; x < image.width(); x++ ) {
+            if ( prevRow )
+                row[ x ] = prevRow[ x ];
+            else if ( y >= pos )
+                row[ x ] = rgbOff;
+            // else leave pixel unchanged
+        }
+    }
+    update();
+}
+
+
+void GlyphEditor::insertRowUp( int pos )
+{
+    for ( int y = 0; y < image.height(); y++ ) {
+        QRgb *row = (QRgb *) image.scanLine( y );
+        for ( int x = 0; x < image.width(); x++ ) {
+            if (( y < pos ) && (( y+1 ) < image.height() )) {
+                QRgb *nextRow = (QRgb *) image.scanLine( y+1 );
+                row[ x ] = nextRow[ x ];
+            }
+            else if ( y <= pos )
+                row[ x ] = rgbOff;
+            // else leave pixel unchanged
+        }
+    }
     update();
 }
 
