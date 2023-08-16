@@ -4,6 +4,15 @@
 # CONFIG += debug console
 CONFIG += map
 
+# BLDLEVEL signature (OS/2 only)
+BL_DEPS = qbf_const.h
+os2:bldlevel.input = BL_DEPS
+os2:bldlevel.output = qbfont.def
+os2:bldlevel.commands = makebl.cmd -DQBFont -N!Alex Taylor! -V!$${LITERAL_HASH}define=PROGRAM_VERSION,qbf_const.h! qbfont.def
+os2:bldlevel.name = running makedesc ...
+os2:bldlevel.CONFIG += target_predeps
+os2:QMAKE_EXTRA_COMPILERS = bldlevel
+
 TEMPLATE = app
 TARGET =
 DEPENDPATH += .
@@ -14,8 +23,8 @@ os2:QMAKE_CXXFLAGS = -Zomf -march=i686 -Wno-unused-local-typedefs -Wno-literal-s
 # Input
 HEADERS += glypheditor.h glyphstatus.h mainwindow.h qbf_const.h
 SOURCES += glypheditor.cpp glyphstatus.cpp main.cpp mainwindow.cpp
-# RESOURCES += qe.qrc
+RESOURCES += qbfont.qrc
 os2:HEADERS += os2native.h
 os2:SOURCES += os2native.cpp
-# os2:RC_FILE = qe.rc
-# win32:RC_FILE = qe_win.rc
+# os2:RC_FILE = qbfont.rc
+# win32:RC_FILE = qbfont_win.rc
